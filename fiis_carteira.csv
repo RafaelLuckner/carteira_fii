@@ -1,0 +1,5 @@
+Código,Tipo,Segmento,Categoria,Dividend Yield (%),P/VP,Vacância (%),Preço Médio (R$),Qtde Cotas,Valor Investido (R$),% da Carteira
+RZTR11,Papel,['Terras Agricolas'],Ancoragem,13.75,0.7,0.0,81.0,5,405.0,21.51394422310757
+GGCR11,Tijolo,['Galpões Logísticos/Indústrial'],Ancoragem,12.3,0.81,0.0,9.21,50,460.50000000000006,24.462151394422314
+GARE11,Tijolo,"['Galpões Logísticos/Indústrial', 'Renda Urbana']",Oportunidade,13.36,0.85,0.0,7.97,70,557.9,29.636122177954842
+BTLG11,Tijolo,['Galpões Logísticos/Indústrial'],Ancoragem,9.94,0.91,0.0,91.82,5,459.09999999999997,24.387782204515272
