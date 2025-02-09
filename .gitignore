@@ -1,2 +1,5 @@
 .env
-*l
+logs
+etl/*.csv*
+etl/test*
+etl/cotacoes*
