@@ -10,7 +10,7 @@ import ast
 st.set_page_config(layout="wide")
 
 # Nome do arquivo CSV para armazenar os dados
-data_file = "fiis_carteira.csv"
+data_file = "data/final/fiis_carteira.csv"
 
 # Colunas do dataset
 columns = [
@@ -26,6 +26,7 @@ def load_data():
         df["Segmento"] = df["Segmento"].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith('[') else [])
         return df
     else:
+        print("Arquivo CSV não encontrado.")
         return pd.DataFrame(columns=columns)
 
 def save_data(df):
@@ -129,93 +130,96 @@ with tab1:
 
 paleta = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
 
-with tab2:
-    st.subheader("📋 Sua Carteira de FIIs")
-    st.dataframe(df)
-    st.subheader("📈 Análise da Carteira")
-    subtab1, subtab2, subtab3 = st.tabs(["Por Categoria", "Por Segmento", "Proventos"])
-    with subtab1:
-        
-        fig = px.pie(
-            values=df["% da Carteira"].round(2),
-            names=df["Categoria"],
-            color_discrete_sequence=paleta)
-
-        fig.update_traces(marker=dict(line=dict(color='black', width=1)))  
-        fig.update_layout(
-            legend_title=dict(text='Segmentos', font=dict(size=14, color='black')),
-            font=dict(size=12, family='Arial')
-        )
-        
-        
-        st.plotly_chart(fig)
-
-
-
-    # Atualize o gráfico para exibir os dados com a porcentagem ajustada
-    with subtab2:
-        
-        # Explodir e dividir a porcentagem
-        df_exploded = dividir_percentual(df)
-        # Agrupar por segmento e calcular a soma da % da carteira
-        segmento_soma = df_exploded.groupby("Segmento")["% da Carteira"].sum()
-        segmento_soma = segmento_soma.round(2)
-        # Exibir o gráfico de barras
-
-        fig = px.pie(
-            values=segmento_soma,
-            names=segmento_soma.index,
-            color_discrete_sequence=paleta
-            )
-
-        fig.update_traces(marker=dict(line=dict(color='black', width=1)))  
-        fig.update_layout(
-            legend_title=dict(text='Segmentos', font=dict(size=14, color='black')),
-            font=dict(size=12, family='Arial')
-        )
-        # Exibindo o gráfico no Streamlit
-        st.plotly_chart(fig)
-
-
-        with subtab3:
-
-            dfaux = df.copy()
-            # Calcular o valor total da carteira
-            total_investido = dfaux["Valor Investido (R$)"].sum()
-
-            # Calcular a média ponderada dos dividendos
-            dfaux["Valor Esperado Anual (R$)"] = np.round((dfaux["Valor Investido (R$)"] * dfaux["Dividend Yield (%)"] / 100),2)
-            media_ponderada_dividendos = dfaux["Valor Esperado Anual (R$)"].sum() / total_investido
-
-            # Calcular o valor mensal e anual que será recebido
-            valor_mensal_total = dfaux["Valor Esperado Anual (R$)"].sum() / 12
-            valor_anual_total = valor_mensal_total * 12
-
-            st.write(f"**Média Ponderada de Dividendos da Carteira:** {media_ponderada_dividendos*100:.2f}%")
-            st.write(f"**Valor Total Esperado de Dividendos Anuais:** R${valor_anual_total:,.2f}")
-            st.write(f"**Valor Total Esperado de Dividendos Mensais:** R${valor_mensal_total:,.2f}")
-
-            st.write("Abaixo estão os detalhes de cada FII e seu valor de dividendos esperado:")
-
-            # Exibir uma tabela com os valores esperados de dividendos
-            dfaux["Valor Esperado Mensal (R$)"] = (np.round(dfaux["Valor Esperado Anual (R$)"] / 12 ,2))
+if not df.empty:
+    with tab2:
+        st.subheader("📋 Sua Carteira de FIIs")
+        st.dataframe(df)
+        st.subheader("📈 Análise da Carteira")
+        subtab1, subtab2, subtab3 = st.tabs(["Por Categoria", "Por Segmento", "Proventos"])
+        with subtab1:
             
-            df_analise = dfaux[["Código", "Dividend Yield (%)", "Valor Investido (R$)", "Valor Esperado Anual (R$)", "Valor Esperado Mensal (R$)"]]
-            st.dataframe(df_analise)
+            fig = px.pie(
+                values=df["% da Carteira"].round(2),
+                names=df["Categoria"],
+                color_discrete_sequence=paleta)
+
+            fig.update_traces(marker=dict(line=dict(color='black', width=1)))  
+            fig.update_layout(
+                legend_title=dict(text='Segmentos', font=dict(size=14, color='black')),
+                font=dict(size=12, family='Arial')
+            )
+            
+            
+            st.plotly_chart(fig)
+
+
+
+        # Atualize o gráfico para exibir os dados com a porcentagem ajustada
+        with subtab2:
+            
+            # Explodir e dividir a porcentagem
+            df_exploded = dividir_percentual(df)
+            # Agrupar por segmento e calcular a soma da % da carteira
+            segmento_soma = df_exploded.groupby("Segmento")["% da Carteira"].sum()
+            segmento_soma = segmento_soma.round(2)
+            # Exibir o gráfico de barras
+
+            fig = px.pie(
+                values=segmento_soma,
+                names=segmento_soma.index,
+                color_discrete_sequence=paleta
+                )
+
+            fig.update_traces(marker=dict(line=dict(color='black', width=1)))  
+            fig.update_layout(
+                legend_title=dict(text='Segmentos', font=dict(size=14, color='black')),
+                font=dict(size=12, family='Arial')
+            )
+            # Exibindo o gráfico no Streamlit
+            st.plotly_chart(fig)
+
+
+            with subtab3:
+
+                dfaux = df.copy()
+                # Calcular o valor total da carteira
+                total_investido = dfaux["Valor Investido (R$)"].sum()
+
+                # Calcular a média ponderada dos dividendos
+                dfaux["Valor Esperado Anual (R$)"] = np.round((dfaux["Valor Investido (R$)"] * dfaux["Dividend Yield (%)"] / 100),2)
+                media_ponderada_dividendos = dfaux["Valor Esperado Anual (R$)"].sum() / total_investido
+
+                # Calcular o valor mensal e anual que será recebido
+                valor_mensal_total = dfaux["Valor Esperado Anual (R$)"].sum() / 12
+                valor_anual_total = valor_mensal_total * 12
+
+                st.write(f"**Média Ponderada de Dividendos da Carteira:** {media_ponderada_dividendos*100:.2f}%")
+                st.write(f"**Valor Total Esperado de Dividendos Anuais:** R${valor_anual_total:,.2f}")
+                st.write(f"**Valor Total Esperado de Dividendos Mensais:** R${valor_mensal_total:,.2f}")
+
+                st.write("Abaixo estão os detalhes de cada FII e seu valor de dividendos esperado:")
+
+                # Exibir uma tabela com os valores esperados de dividendos
+                dfaux["Valor Esperado Mensal (R$)"] = (np.round(dfaux["Valor Esperado Anual (R$)"] / 12 ,2))
+                
+                df_analise = dfaux[["Código", "Dividend Yield (%)", "Valor Investido (R$)", "Valor Esperado Anual (R$)", "Valor Esperado Mensal (R$)"]]
+                st.dataframe(df_analise)
 
 
 
 
 
-with tab3:
-    st.subheader("🗑️ Remover FII")
-    selected_fii = st.selectbox("Selecione um FII para remover", df["Código"].unique() if not df.empty else [])
-    
-    if selected_fii:
-        if st.button("Remover FII"):
-            df = df[df["Código"] != selected_fii]
-            df = atualizar_dataframe(df)
-            save_data(df)
-            st.success("FII removido com sucesso!")
-            time.sleep(3)
-            st.rerun()
+    with tab3:
+        st.subheader("🗑️ Remover FII")
+        selected_fii = st.selectbox("Selecione um FII para remover", df["Código"].unique() if not df.empty else [])
+        
+        if selected_fii:
+            if st.button("Remover FII"):
+                df = df[df["Código"] != selected_fii]
+                df = atualizar_dataframe(df)
+                save_data(df)
+                st.success("FII removido com sucesso!")
+                time.sleep(3)
+                st.rerun()
+else :
+    st.error("Nenhum FII encontrado. Adicione alguns e tente novamente.")
