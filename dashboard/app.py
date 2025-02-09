@@ -5,6 +5,13 @@ import numpy as np
 import os
 import time
 import ast
+import sys
+
+
+# Adiciona o diretório raiz do projeto ao sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.helpers import logger
+
 
 # mudando layout para wide
 st.set_page_config(layout="wide")
@@ -21,12 +28,14 @@ columns = [
 # Verifica se já existe um arquivo CSV, senão cria um dataframe vazio
 def load_data():
     if os.path.exists(data_file):
+        logger.info("Iniciando load data")
         df = pd.read_csv(data_file)
         # Converte a coluna 'Segmento' de volta para lista
         df["Segmento"] = df["Segmento"].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith('[') else [])
         return df
     else:
         print("Arquivo CSV não encontrado.")
+        logger.info("Load data falhou")
         return pd.DataFrame(columns=columns)
 
 def save_data(df):
